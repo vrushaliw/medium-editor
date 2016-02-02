@@ -4754,7 +4754,15 @@ MediumEditor.extensions = {};
          */
         cleanTags: ['meta'],
 
+        /* pastePlainText: Boolean
+         * pasted html will be wrapped in respective tags. If set to true then raw text will be pasted.
+        */
+        pastePlainText: false,
+
         init: function () {
+          if(this.pastePlainText){
+            this.cleanReplacements.push([/<[^>]*>/g, ""]);
+          }
             MediumEditor.Extension.prototype.init.apply(this, arguments);
 
             if (this.forcePlainText || this.cleanPastedHTML) {
@@ -4800,7 +4808,11 @@ MediumEditor.extensions = {};
                     if (paragraphs.length > 1) {
                         for (p = 0; p < paragraphs.length; p += 1) {
                             if (paragraphs[p] !== '') {
+                              if(this.pastePlainText){
+                                html += MediumEditor.util.htmlEntities(paragraphs[p]) + ' ';
+                              }else{
                                 html += '<p>' + MediumEditor.util.htmlEntities(paragraphs[p]) + '</p>';
+                              }
                             }
                         }
                     } else {
@@ -4833,7 +4845,11 @@ MediumEditor.extensions = {};
             tmp = this.document.createElement('div');
 
             // double br's aren't converted to p tags, but we want paragraphs.
-            tmp.innerHTML = '<p>' + text.split('<br><br>').join('</p><p>') + '</p>';
+            if(this.pastePlainText){
+              tmp.innerHTML = text;
+            }else{
+              tmp.innerHTML = '<p>' + text.split('<br><br>').join('</p><p>') + '</p>';
+            }
 
             // block element cleanup
             elList = tmp.querySelectorAll('a,p,div,br');
